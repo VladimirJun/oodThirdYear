@@ -1,0 +1,378 @@
+@startuml
+
+package "Controllers"{
+
+  Class ClassController{
+    -ClassService classService
+    +createClass(Class class) : ResponseEntity<>
+    +deleteClass(long classId) : ResponseEntity<>
+    +updateClass(long classId, Class class) : ResponseEntity<>
+    +markAttendance(Long classId, Student student, Boolean isPresent): ResponseEntity<>
+    +markAttendance(Long classId, Map<Student, Boolean> attendance): ResponseEntity<>
+  }
+  Class TeacherController{
+    -TeacherService teacherService
+    + createTeacher(Teacher teacher) : ResponseEntity<>
+    + deleteTeacher(long id) : ResponseEntity<>
+    + assignTeacherToGroup(long teacherId, Group group) : ResponseEntity<>
+    + removeGroupFromTeacher(long teacherId, Group group) : ResponseEntity<>
+    + getClassesByTeacher(long teacherId) : ResponseEntity<List<CLss>>
+  }
+  Class GroupController{
+    -GroupService groupService
+    + createGroup(Group group) : ResponseEntity<>
+    + deleteGroup(long id) : ResponseEntity<>
+    + editGroup(Group group) : ResponseEntity<Group>
+    + addStudentToGroup(Student student, long groupId): ResponseEntity<>
+    + removeStudentFromGroup(Student student, ): ResponseEntity<>
+  }
+
+  Class StudentController {
+    - StudentService studentService
+    + findByParent(Parent parent) : ResponseEntity<List<Student>>
+    + pay(Student student, int amount) : ResponseEntity<Student>
+  }
+
+  Class AdminCotroller {
+    - AdminService adminService
+    + addHeadTeacher(headTeacher: headTeacher): long
+    + fireHeadTeacher(headTeacherId: long): void
+    + editHeadTeacher(headTeacherId: long): void
+    + notify(): String
+    + handlePayment(payment: Payment): String
+  }
+}
+
+package "Management"{
+
+  Class Admin {
+    + addHeadTeacher(headTeacher: headTeacher): long
+    + fireHeadTeacher(headTeacherId: long): void
+    + editHeadTeacher(headTeacherId: long): void
+    + notify(): String
+    + handlePayment(payment: Payment): String
+  }
+
+  Class HeadTeacher{
+    - String name
+    - List<Teacher> teachers
+    + addTeacher(teacher: Teacher): long
+    + removeTeacher(teacherId: long): void
+    + removeGroupFromTeacher(teacher: Teacher, groupId: long): void
+    + assignTeacherToGroup(teacher: Teacher, group: Group): void
+  }
+
+}
+package "Class"{
+Class Class {
+    - Date date
+    - Map<Student, Boolean> attendance
+    + getAttendence() : Map<Student, Boolean>
+    + getDate() : Date
+    + setAttendance(Map<Student, Boolean> attendance) : void
+    + setDate(Date date) : void
+  }
+  Interface ClassService {
+    +createClass(Class class) : void
+    +deleteClass(long classId) : void
+    +updateClass(long classId, Class class) : void
+    +markAttendance(Long classId, Student student, Boolean isPresent): void
+    +markAttendance(Long classId, Map<Student, Boolean> attendance): void
+  }
+  Class ClassServiceImpl implements ClassService{
+    -ClassRepository classRepository
+    +createClass(Class class) : void
+    +deleteClass(long classId) : void
+    +updateClass(long classId, Class class) : void
+    +markAttendance(Long classId, Student student, Boolean isPresent): void
+    +markAttendance(Long classId, Map<Student, Boolean> attendance): void
+  }
+  Interface ClassRepository{
+   + save(Class class) : void
+   + update(Class class) : void
+   + delete(long id) : void
+   + get(long id) : Class
+  }
+  Class ClassRepositoryImpl implements ClassRepository{
+   - Db dataBase
+   + save(Class class) : void
+   + update(Class class) : void
+   + delete(long id) : void
+   + get(long id) : Class
+  }
+
+  ClassRepository --> Class
+  ClassServiceImpl --> ClassRepository
+}
+package "Teacher{
+Class Teacher {
+    - String name
+    - String surname
+    - String patronymic
+    - List<Group> groups
+    + addGroup(Group group) : void
+    + removeGroup(Group group) : void
+    + getClasses(): List<Class>
+    + getGroups() : List<Group>
+    + getfullName() : String
+    + setGroups(List<Group> groups) : void
+    + setFullName(String fullName) : void
+    + getName() : String
+    + getSurname : String
+    + getPatronymic : String
+    + setName(String name) : void
+    + setSurname(String surname) : void
+    + setPatronymic(String patronymic) : void
+  }
+  Interface TeacherService{
+    + createTeacher(Teacher teacher) : void
+    + deleteTeacher(long id) : void
+    + assignTeacherToGroup(long teacherId, Group group) : void
+    + removeGroupFromTeacher(long teacherId, Group group) : void
+    + getClassesByTeacher(long teacherId) : List<Class>
+  }
+  Class TeacherServiceImpl implements TeacherService{
+    - TeacherRepository teacherRepository
+    + createTeacher(Teacher teacher) : void
+    + deleteTeacher(long id) : void
+    + assignTeacherToGroup(long teacherId, Group group) : void
+    + removeGroupFromTeacher(long teacherId, Group group) : void
+    + getClassesByTeacher(long teacherId) : List<Class>
+  }
+  Interface TeacherRepository{
+   + save(Teacher teacher) : void
+   + update(Teacher teacher) : void
+   + delete(long id) : void
+   + get(long id) : Teacher
+  }
+  Class TeacherRepositoryImpl implements TeacherRepository {
+   - Db dataBase
+   + save(Teacher teacher) : void
+   + update(Teacher teacher) : void
+   + delete(long id) : void
+   + get(long id) : Teacher
+  }
+  TeacherRepository --> Teacher
+  TeacherServiceImpl --> TeacherRepository
+}
+package "Group"{
+  Class Group {
+    - String name
+    - List<Student> students
+    - List<Class> schedule
+    + getName() : String
+    + getStudents(): List<Student>
+    + getSchedule() : List <Class>
+    + setName(String name) : void
+    + setStudents(List<Student> students) : void
+    + setSchedule(List<Class> schedule) : void
+    + addClassToSchedule(Class class): List<Class>
+  }
+  Interface GroupService{
+    + createGroup(Group group) : void
+    + deleteGroup(long id) : void
+    + editGroup(Group group) : Group
+    + addStudentToGroup(Student student, long groupId): long
+    + removeStudentFromGroup(Student student, ): void
+  }
+  Class GroupServiceImpl implements GroupService{
+    - GroupRepository groupRepository
+    + createGroup(Group group)
+    + deleteGroup(long id)
+    + editGroup(Group group)
+    + addStudentToGroup(Student student, long groupId): void
+    + removeStudentFromGroup(Student student, long groupId): void
+  }
+  Interface GroupRepository {
+   + save(Group group) : void
+   + update(Group group) : void
+   + delete(long id) : void
+   + get(long id) : Group
+  }
+  Class GroupRepositoryImpl implements GroupRepository {
+   - Db dataBase
+   + save(Group group) : void
+   + update(Group group) : void
+   + delete(long id) : void
+   + get(long id) : Group
+  }
+  GroupRepository --> Group
+  GroupServiceImpl --> GroupRepository
+
+}
+package "Clients"{
+Class Student {
+    - String name
+    - String surname
+    - String patronymic
+    - Parent parent
+    - boolean isPaid
+    + viewAttendance(): String
+    + getName() : String
+    + getSurname : String
+    + getPatronymic : String
+    + getParent() : Parent
+    + getPaid() : boolean
+    + setName(String name) : void
+    + setSurname(String surname) : void
+    + setPatronymic(String patronymic) : void
+    + setParent(Parent parent) : void
+    + setPaid(boolean isPaid) : void
+
+  }
+  Interface StudentService {
+    + findByParent(Parent parent) : List<Student>
+    + pay(Student student, int amount) : Payment
+  }
+  Class StudentServiceImpl implements StudentService{
+    - StudentRepository studentRepository
+    - PaymentService paymentService
+    + findByParent(Parent parent) : List<Student>
+    + pay(Student student, int amount) : Payment
+  }
+  Interface StudentRepository {
+   + save(Student student)
+   + update(long id) : void
+   + delete(long id) : void
+   + get(long id) : Student
+  }
+  Class StudentRepositoryImpl implements StudentRepository{
+   - Db dataBase
+   + save(Student student)
+   + update(long id) : void
+   + delete(long id) : void
+   + get(long id) : Student
+  }
+
+
+
+  Class Parent {
+    - String name
+    - String surname
+    - String patronymic
+    - String email
+    + getName() : String
+    + getSurname : String
+    + getPatronymic : String
+    + getEmail() : String
+    + setName(String name) : void
+    + setSurname(String surname) : void
+    + setPatronymic(String patronymic) : void
+    + setEmail(String email) : void
+  }
+
+  StudentRepository --> Student
+  StudentServiceImpl --> StudentRepository
+}
+
+package "Finance"{
+
+  Class Notifier {
+   - List<Payment> payments
+   + notifyDebtor(parent: Parent) : Notification
+   + getNotifications() : List<Notification>
+  }
+Class Notification {
+   - String message
+   - int ammountOfDebt
+   + generateMessage() : String
+   + getNotificationInfo() : String
+  }
+
+  Class PaymentOperator {
+    - List<Parent> debtors
+    - List<Payment> payments
+    + acceptPayment(payment: Payment) : void
+    + sendPaymentToAdmin(payment: Payment) : void
+  }
+
+  Interface PaymentService{
+    + acceptPayment(payment: Payment) : void
+    + getPayment() : Payment
+  }
+
+  Class PaymentServiceImpl implements PaymentService{
+    + acceptPayment(payment: Payment) : void
+  }
+
+  Interface PaymentRepository{
+  }
+
+  Class PaymentRepositoryImpl implements PaymentRepository{
+    -Db dataBase
+  }
+
+  PaymentService --> PaymentRepository
+
+  Class PaymentSenderService {
+    -PaymentService paymentService
+    + sendPaymentToUniversity(payment: Payment) : void
+  }
+
+  PaymentSenderService --> PaymentService
+
+  Interface NotificationService{
+    + sendPaymentToUniversity(payment: Payment) : void
+  }
+
+  Class NotificationServiceImpl implements NotificationService{
+
+  }
+
+
+  Class DbAggregator {
+   - List<Payment> payments
+   - List<Parent> debtors
+   + addPayment(payment: Payment) : void
+   + calculateDebtors()
+   + gatDebtors() : List<Parent>
+  }
+
+  Interface DbAggregatorRepository{
+  }
+
+  Interface DbAggregatorService{
+  }
+
+  Class DbAggregatorServiceImpl{
+  }
+
+  Class DbAggregatorRepositoryImpl{
+  }
+
+
+  Class Payment {
+    - DateTime date
+    - Student student
+    - int amount
+  }
+
+}
+PaymentOperator --> DbAggregator
+DbAggregatorRepositoryImpl .up.|> DbAggregatorRepository
+DbAggregatorServiceImpl .up.|> DbAggregatorService
+
+
+DbAggregatorRepository --> DbAggregator
+DbAggregatorServiceImpl --> DbAggregatorRepository
+
+Notifier --> Parent
+
+StudentService --> PaymentService
+
+Admin--> HeadTeacher
+HeadTeacher --> Teacher
+Teacher *-- Group
+Group o-- Student
+Student  *-- Parent
+PaymentOperator --> Payment
+PaymentService --> Parent
+PaymentOperator --> Admin
+Group *-- Class
+Class --> Student
+
+TeacherController --> TeacherService
+GroupController --> GroupService
+ClassController --> ClassService
+StudentController --> StudentService
+@enduml
